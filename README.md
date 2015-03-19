@@ -17,7 +17,7 @@
 
 # Запуск
 
-    $ python test_bot1.py
+    $ python3 test_bot1.py
     
 # Пример вывода 
 
