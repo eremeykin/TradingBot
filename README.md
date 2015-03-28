@@ -9,15 +9,15 @@
 
 Модуль requests для запросов на сервер. Используя pip:
 
-    $ sudo pip install requests
+    $ sudo pip3 install requests
 
 Модуль matplotlib для построения графика:
 
-    $ sudo pip install matplotlib
+    $ sudo pip3 install matplotlib
 
 # Запуск
 
-    $ python test_bot1.py
+    $ python3 test_bot1.py
     
 # Пример вывода 
 
