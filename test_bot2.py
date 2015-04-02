@@ -7,10 +7,11 @@ import threading
 import matplotlib.pyplot as plt
 from optparse import OptionParser
 import datetime
+import matplotlib.pyplot as plt
 
 
 class ServerConnection(object):
-    """Простая печать тиков."""
+    """Печать тиков с построением точек на графике."""
 
     accountId = "5968094"
     token = '645ed9d76182140938834f0c240a9ac6-b088512f8d506024c55dd72d24423efb'
@@ -19,6 +20,14 @@ class ServerConnection(object):
     instrument = "EUR_USD"
     displayHeartbeat = False
     time_out = 2000
+    i=0
+
+
+    def __init__(self):
+        print(self.i)
+        # plt.axis([0, 1000, 0, 1])       
+        plt.ion()
+        plt.show()
 
     def connect_to_stream(self):
         try:
@@ -86,10 +95,17 @@ class ServerConnection(object):
                             'ask': ask,
                             'bid': bid
                         }
+                        self.i=self.i+1
+                        self.plot(self.i,ask)
                         # print(tick)
                     print(line)
         except Exception as e:
             print("Caught exception when reading response. Exception message:\n" + str(e))
+
+    
+    def plot(self,i,value):
+        plt.scatter(i,value)
+        plt.draw()
 
 
 if __name__ == "__main__":
