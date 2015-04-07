@@ -1,9 +1,6 @@
 # TradingBot
 
-Простой пробный бот. Выводит в режиме реального времени ask и bid для EUR/USD. 
-Строит график цены после прихода информации от 30 значениях цены. 
-Открывает long, если 5 тиков подряд наблюдает повышение цены и short если 5 тиков
-подряд снижение.
+Простой пробный бот. Выводит в режиме реального времени ask и bid для EUR/USD. <I>(Примечание: по выходным торги закрыты)</I>
 
 # Установка
 
@@ -15,6 +12,17 @@
 
     $ sudo pip3 install matplotlib
 
+Модуль Pyke: 
+Скачать с [sourceforge](http://sourceforge.net/projects/pyke/files/pyke/1.1.1/pyke3-1.1.1.zip/download), распаковать. Выполнить из директории с файлами: 
+
+    $ python3 setup.py build
+    $ sudo python3 setup.py install
+
+Проверка:
+
+    $ python3 
+    >>> from pyke import knowledge_engine
+    
 # Запуск
 
     $ python3 test_bot1.py
