@@ -1,0 +1,6 @@
+curl  -X POST -d "instrument=EUR_USD&units=2&side=sell&type=market" "https://api-fxpractice.oanda.com/v1/accounts/5968094/orders" -H "Authorization:Bearer 645ed9d76182140938834f0c240a9ac6-b088512f8d506024c55dd72d4423efb"
+
+curl -X POST -d "instrument=EUR_USD&units=2&side=sell&type=market" "https://api-fxtrade.oanda.com/v1/accounts/5968094/orders" -H "Authorization:Bearer 645ed9d76182140938834f0c240a9ac6-b088512f8d506024c55dd72d24423efb"
+
+curl "-X POST -d "instrument=EUR_USD&units=2&side=buy&type=market" "https://api-fxtrade.oanda.com/v1/accounts/5968094/orders" -H "Authorization:Bearer 645ed9d76182140938834f0c240a9ac6-b088512f8d506024c55dd72d24423efb"
+

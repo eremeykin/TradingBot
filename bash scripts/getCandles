@@ -1,0 +1,1 @@
+ curl -X GET "https://api-fxpractice.oanda.com/v1/candles?instrument=EUR_USD&count=5" -H "Authorization: Bearer 645ed9d76182140938834f0c240a9ac6-b088512f8d506024c55dd72d24423efb"
