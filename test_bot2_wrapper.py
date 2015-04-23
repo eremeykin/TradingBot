@@ -8,6 +8,7 @@ import threading
 import matplotlib.pyplot as plt
 from optparse import OptionParser
 import datetime
+from TickRepository import TickRepository
 
 class TestServerConnection2(ServerConnection2):
 
@@ -15,6 +16,7 @@ class TestServerConnection2(ServerConnection2):
     order_url = "http://127.0.0.1:8080"
     candles_url= "http://127.0.0.1:8080/candles"
     accountId=0
+    tr=TickRepository()
 
 
     def connect_to_stream(self):
@@ -37,22 +39,18 @@ class TestServerConnection2(ServerConnection2):
                     msg = json.loads(line)
                 except Exception as e:
                     print("Caught exception when converting message into json. Exception message:\n" + str(e))
-                    return
                 if 'tick' in msg:
+                    # print(msg)
                     self.process_tick(msg)
-                self.get_next()
 
 
-    def get_next(self):
-        try:
+    def get_next(self):        
             s = requests.Session()
             headers = {'Action': 'need_next_tick','Client-Identificator': str(self.accountId)}
             req = requests.Request('GET', self.url, headers=headers)
             pre = req.prepare()
             resp = s.send(pre, stream=False, verify=False, timeout=self.time_out)
             return resp
-        except Exception as e:
-            print("Caught exception when connecting to stream. Exception message:\n" + str(e))
-            s.close()
+        
 
 TestServerConnection2().start()

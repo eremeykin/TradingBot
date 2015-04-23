@@ -13,87 +13,90 @@ from matplotlib.dates import date2num
 from time import sleep
 from matplotlib import dates
 from test_bot1 import ServerConnection
+import dateutil.parser
+from TickRepository import TickRepository
+
 
 class ServerConnection2(ServerConnection):
     """Печать тиков с построением свечей."""
 
 
     def __init__(self):   
+        self.c=0
         plt.ion()
         self.plot = Candleplot()
+        self.tr=TickRepository()
 
+    # def get_candles(self,count):
+    #     try:
+    #         # print("get candles")
+    #         s = requests.Session()
+    #         headers = {'Authorization': 'Bearer ' + self.token,
+    #                    'Client-Identificator':str(self.accountId)
+    #         }
+    #         params = {'instrument': self.instrument, 'count': count,'granularity':'M1'}
+    #         url = self.candles_url
+    #         req = requests.Request('GET', url, headers=headers, params=params)
+    #         pre = req.prepare()
+    #         resp = s.send(pre, stream=False, verify=False, timeout=self.time_out)
+    #         return resp
+    #     except Exception as e:
+    #         print("Caught exception when connecting to stream. Exception message:\n" + str(e))
+    #         s.close()
 
-    def get_candles(self,count):
-        try:
-            # print("get candles")
-            s = requests.Session()
-            headers = {'Authorization': 'Bearer ' + self.token,
-                       'Client-Identificator':str(self.accountId)
-            }
-            params = {'instrument': self.instrument, 'count': count,'granularity':'M1'}
-            url = self.candles_url
-            req = requests.Request('GET', url, headers=headers, params=params)
-            pre = req.prepare()
-            resp = s.send(pre, stream=False, verify=False, timeout=self.time_out)
-            return resp
-        except Exception as e:
-            print("Caught exception when connecting to stream. Exception message:\n" + str(e))
-            s.close()
-
-
+    # We'll fire you if you override this method.
     def process_tick(self,msg):
-
         tick = {
-            'time': msg['tick']['time'],
-            'ask': msg['tick']['bid'],
-            'bid': msg['tick']['ask']
+            'time': dateutil.parser.parse(msg['tick']['time']),
+            'ask': msg['tick']['ask'],
+            'bid': msg['tick']['bid']
         }
-        candles = self.get_candles(20)
-        try:
-            msg = json.loads(candles.text)
-        except Exception as e:
-            print("Caught exception when parsing json. Exception message:\n" + str(e))
+        ask=float(msg['tick']['ask'])
+        bid=float(msg['tick']['bid'])
+        self.c+=1
+        # print('Принято '+str(self.c)+' тиков.')
+        # Если минута не изменилась
+        # то просто добавляем тик и уходим
+        if len(self.tr.ticks)>0 and self.tr.ticks[-1]['time'].minute==tick['time'].minute:
+            self.tr.add(tick)
+            return
+        # построение последних 20 свечей
+        # print('\n\n\n\n\n\n\n\n\n\n')
+        self.tr.add(tick)
+        # candles = self.tr.get_candles(20)
+        # msg = json.loads(candles)
 
-        last_complete_candle = msg['candles'][0]
-        values = []
-        for candle in msg['candles']:
-            date = date2num(datetime.strptime(candle['time'],'%Y-%m-%dT%H:%M:%S.%fZ'))
-            openBid = candle['openBid']
-            closeBid = candle['closeBid']
-            highBid = candle['highBid']
-            lowBid = candle['lowBid']
-            value = (date,openBid,closeBid,highBid,lowBid)
-            values.append(value)
-
-        self.plot.update(values,clear=True)
-        candles = self.get_candles(5)
-        msg = json.loads(candles.text)
-        # if self.try_long(msg['candles']):
-        #     self.order('EUR_USD', 100, 'buy', ask+0.0007, bid-0.0004)
-        #     t.sleep(60) # Заменить НЕМЕДЛЕННО
-        # elif self.try_short(msg['candles']):    
-        #     self.order('EUR_USD', 100, 'sell', ask-0.0004, bid+0.0007)
-        #     t.sleep(60) # Заменить НЕМЕДЛЕННО
-        
-        candles = self.get_candles(15)
-        msg = json.loads(candles.text)
+        # print(len(self.tr.ticks))
+        # if len(msg['candles'])<20:
+        #     #print(len(self.tr.ticks))
+        #     return
+        # last_complete_candle = msg['candles'][0]
+        # values = []
+        # for candle in msg['candles']:
+        #     date = date2num(datetime.strptime(candle['time'],'%Y-%m-%dT%H:%M:%S.%fZ'))
+        #     openBid = candle['openBid']
+        #     closeBid = candle['closeBid']
+        #     highBid = candle['highBid']
+        #     lowBid = candle['lowBid']
+        #     value = (date,openBid,closeBid,highBid,lowBid)
+        #     values.append(value)
+        # self.plot.update(values,clear=True)
+        # return
+        # обработка ситуации на рынке
+        candles = self.tr.get_candles(5)
+        msg = json.loads(candles)
+        if len(msg['candles'])<5:
+            return
+        if self.try_long(msg['candles']):
+            # self.plot.save(msg)
+            self.order('EUR_USD', 100, 'buy', ask+0.0007, bid-0.0004)
+        elif self.try_short(msg['candles']):    
+            # self.plot.save(msg)
+            self.order('EUR_USD', 100, 'sell', ask-0.0004, bid+0.0007)
 
 
     def process_heartbeat(self,msg):
-        candles = self.get_candles(20)
-        msg = json.loads(candles.text)
-        last_complete_candle = msg['candles'][0]
-        values = []
-        for candle in msg['candles']:
-            date = date2num(datetime.strptime(candle['time'],'%Y-%m-%dT%H:%M:%S.%fZ'))
-            openBid = candle['openBid']
-            closeBid = candle['closeBid']
-            highBid = candle['highBid']
-            lowBid = candle['lowBid']
-            value = (date,openBid,closeBid,highBid,lowBid)
-            values.append(value)
-
-        self.plot.update(values,clear=True)
+        return
 
 
     def check_candle(self,candle):
@@ -137,7 +140,7 @@ class ServerConnection2(ServerConnection):
             if not self.is_bear(c):
                 return False
         if self.is_bull(candles[3]) and candles[3]['closeAsk']>candles[2]['openAsk']:
-            print("!!!!!!!!!!!!!!!!!!!ORDER!!!")
+            print("\a\nORDER\n")
             print(candles)
             return True
 
@@ -149,16 +152,18 @@ class ServerConnection2(ServerConnection):
             if not self.is_bull(c):
                 return False
         if self.is_bear(candles[3]) and candles[3]['closeAsk']<candles[2]['openAsk']:
-            print("!!!!!!!!!!!!!!!!!!!ORDER!!!")
+            print("\a\nORDER\n")
             print(candles)
             return True
 
 
 class Candleplot():
+
+    counter=0
     
     def __init__(self):
-        fig, self.ax = plt.subplots()
-        fig.subplots_adjust(bottom=0.2)
+        self.fig, self.ax = plt.subplots()
+        self.fig.subplots_adjust(bottom=0.2)
         plt.ion()
 
     def update(self, quotes, clear=False):
@@ -182,9 +187,22 @@ class Candleplot():
         self.ax.xaxis_date()
         self.ax.autoscale_view()
         plt.setp( plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
+        # plt.draw()
 
-        plt.draw()
 
+    def save(self,msg):
+        self.counter+=1
+        values = []
+        for candle in msg['candles']:
+            date = date2num(datetime.strptime(candle['time'],'%Y-%m-%dT%H:%M:%S.%fZ'))
+            openBid = candle['openBid']
+            closeBid = candle['closeBid']
+            highBid = candle['highBid']
+            lowBid = candle['lowBid']
+            value = (date,openBid,closeBid,highBid,lowBid)
+            values.append(value)
+        self.update(values,clear=True)
+        self.fig.savefig('orders/order#'+str(self.counter)+'.png')
 
 if __name__ == "__main__":
     ServerConnection2().start()

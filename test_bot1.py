@@ -33,6 +33,7 @@ class ServerConnection(object):
         except Exception as e:
             print("Caught exception when connecting to stream. Exception message:\n" + str(e))
             s.close()
+            exit()
 
 
     def order(self, instr, units, side, take_profit, stop_loss):
@@ -69,12 +70,8 @@ class ServerConnection(object):
         if not response or response.status_code != 200:
             print('not response or !=200')
             return
-        try:
-            self.process_response(response)
-            print('3333')
-        except Exception as e:
-            print("Caught exception when reading response. Exception message:\n" + str(e))
-
+        self.process_response(response)
+        
 
     def process_response(self,response):
         for line in response.iter_lines(1):
