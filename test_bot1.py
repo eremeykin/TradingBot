@@ -59,8 +59,6 @@ class ServerConnection(object):
             })
             print(params)
             req = requests.post(self.order_url, data=params, headers=headers)
-            for line in req.iter_lines(1):
-                print(">", line)
         except Exception as e:
             print("Caught exception when connecting to orders\n" + str(e))
 

@@ -1,4 +1,4 @@
-from test_bot2 import ServerConnection2
+from test_bot2reserve import ServerConnection2
 from builtins import range
 import requests
 import time
@@ -8,7 +8,9 @@ import threading
 import matplotlib.pyplot as plt
 from optparse import OptionParser
 import datetime
+import os
 from TickRepository import TickRepository
+
 
 class TestServerConnection2(ServerConnection2):
 
@@ -18,6 +20,11 @@ class TestServerConnection2(ServerConnection2):
     accountId=0
     tr=TickRepository()
 
+    def __init__(self):
+        super().__init__()
+        for subdir, dirs, files in os.walk('orders'):
+            for file in files:
+                os.remove('orders/'+file)
 
     def connect_to_stream(self):
         resp = super().connect_to_stream()
@@ -31,8 +38,8 @@ class TestServerConnection2(ServerConnection2):
         
         
     def process_response(self,response):
+        self.get_next()
         for line in response.iter_lines(1):
-            self.get_next()
             if line:
                 try:
                     line = line.decode('utf-8')
@@ -42,6 +49,7 @@ class TestServerConnection2(ServerConnection2):
                 if 'tick' in msg:
                     # print(msg)
                     self.process_tick(msg)
+                    self.get_next()
 
 
     def get_next(self):        
